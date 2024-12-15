@@ -1,1 +1,74 @@
-cd /path/to/project/folder
+# Project Yara: Sign Language Translator
+
+## Project Structure
+
+```
+Yara/
+|-- videos/
+|   |-- arabic/
+|   |   |-- eat.mp4
+|   |   |-- drink.mp4
+|   |   |-- morning.mp4
+|   |-- english/
+|       |-- eat.mp4
+|       |-- drink.mp4
+|       |-- morning.mp4
+|-- app.py
+|-- requirements.txt
+|-- README.md
+```
+
+### File: requirements.txt
+```
+tkinter
+opencv-python
+SpeechRecognition
+PyAudio
+```
+
+### File: README.md
+```
+# Yara: Sign Language Translator
+
+## Overview
+Yara is a simple, user-friendly application designed to assist people who are deaf or hard of hearing. It translates text and spoken words into sign language using videos. The application supports multiple languages, including Arabic and English.
+
+### Features
+- Translate text into sign language.
+- Translate speech into sign language.
+- Learn sign language through an interactive video-based interface.
+
+## Getting Started
+
+### Prerequisites
+Make sure you have Python 3.7 or later installed.
+
+### Installation
+1. Clone the repository:
+```bash
+git clone https://github.com/YOUR_USERNAME/Yara.git
+cd Yara
+```
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+3. Run the application:
+```bash
+python app.py
+```
+
+## Contributing
+Contributions are welcome! Please fork the repository and submit a pull request.
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+```
+
+### Upload Process
+
+- **Step 1:** Prepare all files and make sure the repository is clean and organized.
+- **Step 2:** Initialize a GitHub repository.
+- **Step 3:** Push the files with appropriate commit messages.
+
+I will now finalize these details and upload the project. Once done, I'll share the GitHub link with you!

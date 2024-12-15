@@ -1,74 +1,121 @@
-# Project Yara: Sign Language Translator
+import os
+import cv2
+import tkinter as tk
+from tkinter import messagebox
+import speech_recognition as sr
 
-## Project Structure
+# مكتبات الحركات للغات المختلفة
+libraries = {
+    "العربية": {
+        "أكل": "videos/arabic/eat.mp4",
+        "شرب": "videos/arabic/drink.mp4",
+        "صباح": "videos/arabic/morning.mp4",
+    },
+    "الإنجليزية": {
+        "eat": "videos/english/eat.mp4",
+        "drink": "videos/english/drink.mp4",
+        "morning": "videos/english/morning.mp4",
+    },
+}
 
-```
-Yara/
-|-- videos/
-|   |-- arabic/
-|   |   |-- eat.mp4
-|   |   |-- drink.mp4
-|   |   |-- morning.mp4
-|   |-- english/
-|       |-- eat.mp4
-|       |-- drink.mp4
-|       |-- morning.mp4
-|-- app.py
-|-- requirements.txt
-|-- README.md
-```
+# اللغة الحالية
+current_language = "العربية"
 
-### File: requirements.txt
-```
-tkinter
-opencv-python
-SpeechRecognition
-PyAudio
-```
+# وظيفة لتحليل النص وتشغيل الحركات
+def text_to_sign(text):
+    words = text.split()  # تقسيم النص إلى كلمات
+    library = libraries[current_language]  # مكتبة اللغة الحالية
+    for word in words:
+        if word in library:
+            play_video(library[word])
+        else:
+            messagebox.showwarning("تنبيه", f"الحركة غير متوفرة للكلمة: {word}")
 
-### File: README.md
-```
-# Yara: Sign Language Translator
+# وظيفة لتشغيل الفيديو
+def play_video(video_path):
+    if not os.path.exists(video_path):
+        messagebox.showerror("خطأ", "الفيديو غير موجود!")
+        return
+    cap = cv2.VideoCapture(video_path)
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        cv2.imshow('لغة الإشارة', frame)
+        if cv2.waitKey(25) & 0xFF == ord('q'):  # اضغط Q للخروج من العرض
+            break
+    cap.release()
+    cv2.destroyAllWindows()
 
-## Overview
-Yara is a simple, user-friendly application designed to assist people who are deaf or hard of hearing. It translates text and spoken words into sign language using videos. The application supports multiple languages, including Arabic and English.
+# وظيفة لتحويل الصوت إلى نص
+def audio_to_text():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        messagebox.showinfo("تعليمات", "تحدث الآن...")
+        try:
+            audio = recognizer.listen(source, timeout=5)
+            text = recognizer.recognize_google(audio, language="ar-SA" if current_language == "العربية" else "en-US")
+            messagebox.showinfo("النص المحول", f"تم التعرف على النص: {text}")
+            return text
+        except sr.UnknownValueError:
+            messagebox.showerror("خطأ", "لم يتم التعرف على الصوت. حاول مرة أخرى.")
+        except sr.RequestError:
+            messagebox.showerror("خطأ", "تعذر الوصول إلى خدمة التعرف على الصوت.")
+        except sr.WaitTimeoutError:
+            messagebox.showerror("خطأ", "لم يتم إدخال أي صوت.")
+        return None
 
-### Features
-- Translate text into sign language.
-- Translate speech into sign language.
-- Learn sign language through an interactive video-based interface.
+# إنشاء واجهة المستخدم
+def create_gui():
+    global current_language
+    # النافذة الرئيسية
+    root = tk.Tk()
+    root.title("مترجم لغة الإشارة")
+    root.geometry("400x400")
 
-## Getting Started
+    # اختيار اللغة
+    tk.Label(root, text="اختر لغة الإشارة:", font=("Arial", 14)).pack(pady=10)
+    language_var = tk.StringVar(value="العربية")
 
-### Prerequisites
-Make sure you have Python 3.7 or later installed.
+    def set_language():
+        global current_language
+        current_language = language_var.get()
+        messagebox.showinfo("إعداد", f"تم اختيار لغة الإشارة: {current_language}")
 
-### Installation
-1. Clone the repository:
-```bash
-git clone https://github.com/YOUR_USERNAME/Yara.git
-cd Yara
-```
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-3. Run the application:
-```bash
-python app.py
-```
+    tk.OptionMenu(root, language_var, *libraries.keys()).pack(pady=5)
+    tk.Button(root, text="تأكيد اللغة", font=("Arial", 14), command=set_language).pack(pady=10)
 
-## Contributing
-Contributions are welcome! Please fork the repository and submit a pull request.
+    # مربع إدخال النص
+    tk.Label(root, text="أدخل النص هنا:", font=("Arial", 14)).pack(pady=10)
+    text_entry = tk.Entry(root, font=("Arial", 14), width=30)
+    text_entry.pack(pady=5)
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
-```
+    # زر تشغيل الحركات بناءً على النص
+    def on_translate():
+        text = text_entry.get()
+        if text.strip():
+            text_to_sign(text)
+        else:
+            messagebox.showwarning("تنبيه", "يرجى إدخال النص!")
 
-### Upload Process
+    tk.Button(root, text="ترجمة النص", font=("Arial", 14), command=on_translate).pack(pady=10)
 
-- **Step 1:** Prepare all files and make sure the repository is clean and organized.
-- **Step 2:** Initialize a GitHub repository.
-- **Step 3:** Push the files with appropriate commit messages.
+    # زر تشغيل الحركات بناءً على الصوت
+    def on_audio_translate():
+        text = audio_to_text()
+        if text:
+            text_to_sign(text)
 
-I will now finalize these details and upload the project. Once done, I'll share the GitHub link with you!
+    tk.Button(root, text="ترجمة الصوت", font=("Arial", 14), command=on_audio_translate).pack(pady=10)
+
+    # زر الخروج
+    tk.Button(root, text="خروج", font=("Arial", 14), command=root.destroy).pack(pady=10)
+
+    # تشغيل التطبيق
+    root.mainloop()
+
+# تشغيل واجهة المستخدم
+try:
+    create_gui()
+except Exception as e:
+    messagebox.showerror("خطأ غير متوقع", f"حدث خطأ: {str(e)}")
